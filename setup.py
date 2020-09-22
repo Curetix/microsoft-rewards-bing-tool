@@ -1,15 +1,15 @@
 from setuptools import setup
 
 setup(
-    name="BingSearchTool",
-    version="1.0",
-    py_modules=["client"],
+    name="BingSearch",
+    version="1.1",
+    py_modules=["bingsearch"],
     install_requires=[
         "click",
         "PyInquirer"
     ],
     entry_points="""
         [console_scripts]
-        bingsearch=client:main
+        bingsearch=bingsearch:cli
     """,
 )

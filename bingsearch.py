@@ -38,6 +38,7 @@ def search_edge():
 
 
 def search(num_of_searches, user_agent=None):
+    global chrome_process
     search_terms = random.sample(WORDS, num_of_searches)
     cmd = get_chrome_cmd(user_agent)
 
@@ -59,6 +60,7 @@ def search(num_of_searches, user_agent=None):
 
 
 def healthchecks_ping():
+    global chrome_process
     cmd = get_chrome_cmd()
     chrome_process = subprocess.Popen(cmd + ["--new-window", "https://hc-ping.com/061fd64c-7bdc-4ad6-ba1e-8fbecd621c7c"])
     time.sleep(2)
@@ -124,7 +126,7 @@ def menu():
 @click.option("--normal", is_flag=True)
 @click.option("--mobile", is_flag=True)
 @click.option("--edge", is_flag=True)
-def main(all_, normal, mobile, edge):
+def cli(all_, normal, mobile, edge):
     if not all_ and not normal and not mobile and not edge:
         while menu():
             click.clear()
@@ -141,7 +143,7 @@ def main(all_, normal, mobile, edge):
 
 if __name__ == "__main__":
     try:
-        main()
+        cli()
     except Exception as exception:
         if chrome_process is not None:
             kill_process(chrome_process.pid)
