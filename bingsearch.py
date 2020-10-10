@@ -62,7 +62,9 @@ def search(num_of_searches, user_agent=None):
 def healthchecks_ping():
     global chrome_process
     cmd = get_chrome_cmd()
-    chrome_process = subprocess.Popen(cmd + ["--new-window", "https://hc-ping.com/061fd64c-7bdc-4ad6-ba1e-8fbecd621c7c"])
+    chrome_process = subprocess.Popen(
+        cmd + ["--new-window", "https://hc-ping.com/061fd64c-7bdc-4ad6-ba1e-8fbecd621c7c"]
+    )
     time.sleep(2)
     kill_process(chrome_process.pid)
 
@@ -87,6 +89,7 @@ def kill_process(pid):
             subprocess.Popen(["taskkill", "/F", "/PID", str(pid)], stdout=subprocess.DEVNULL)
         else:
             subprocess.Popen(["kill", str(pid)], stdout=subprocess.DEVNULL)
+        time.sleep(0.5)
     except:
         click.echo("Couldn't kill Chrome process!")
 
@@ -128,8 +131,7 @@ def menu():
 @click.option("--edge", is_flag=True)
 def cli(all_, normal, mobile, edge):
     if not all_ and not normal and not mobile and not edge:
-        while menu():
-            click.clear()
+        menu()
     elif all_:
         search_all()
     else:
@@ -145,7 +147,8 @@ if __name__ == "__main__":
     try:
         cli()
     except Exception as exception:
-        if chrome_process is not None:
-            kill_process(chrome_process.pid)
         import traceback
         traceback.print_tb(exception)
+
+    if chrome_process is not None:
+        kill_process(chrome_process.pid)
