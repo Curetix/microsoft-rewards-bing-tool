@@ -13,6 +13,9 @@ WORDS = ["play", "extravagant", "district", "master", "guns", "accursed", "flowe
 EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36 Edg/83.0.478.54"
 MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; POCO F1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"
 
+# If chrome cannot be found on your system, please enter the path to chrome.exe in this variable
+CHROME_PATH = ""
+
 chrome_process = None
 
 
@@ -68,12 +71,21 @@ def healthchecks_ping():
     time.sleep(2)
     kill_process(chrome_process.pid)
 
+def open_rewards():
+    global chrome_process
+    cmd = get_chrome_cmd()
+    chrome_process = subprocess.Popen(
+        cmd + ["--new-window", "https://account.microsoft.com/rewards/"]
+    )
+
 
 def get_chrome_cmd(user_agent=None):
     cmd = []
 
-    if platform.system() == "Windows":
-        cmd.append("C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe")
+    if CHROME_PATH:
+    	cmd.append(CHROME_PATH)
+    elif platform.system() == "Windows":
+        cmd.append("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe")
     else:
         cmd.append("chrome")
 
@@ -100,7 +112,7 @@ def menu():
             "type": "list",
             "message": "Which search do you want to run?",
             "name": "search",
-            "choices": [{"name": n} for n in ["All", "Desktop", "Mobile", "Edge"]]
+            "choices": [{"name": n} for n in ["All", "Desktop", "Mobile", "Edge", "Ping", "Rewards"]]
         },
     ]
 
@@ -114,12 +126,17 @@ def menu():
     if selected == "All":
         search_all()
         healthchecks_ping()
+        open_rewards()
     elif selected == "Desktop":
         search_normal()
     elif selected == "Mobile":
         search_mobile()
     elif selected == "Edge":
         search_edge()
+    elif selected == "Ping":
+    	healthchecks_ping()
+    elif selected == "Rewards":
+    	open_rewards()
 
     return True
 
