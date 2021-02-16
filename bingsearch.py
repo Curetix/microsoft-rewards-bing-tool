@@ -3,6 +3,7 @@ import subprocess
 import random
 import time
 import platform
+from shutil import which
 
 import click
 from PyInquirer import prompt
@@ -13,6 +14,8 @@ WORDS = ["play", "extravagant", "district", "master", "guns", "accursed", "flowe
 EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36 Edg/83.0.478.54"
 MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; POCO F1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"
 
+CHROME_WIN_X86 = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
+CHROME_WIN_X64 = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
 # If chrome cannot be found on your system, please enter the path to chrome.exe in this variable
 CHROME_PATH = ""
 
@@ -82,12 +85,17 @@ def open_rewards():
 def get_chrome_cmd(user_agent=None):
     cmd = []
 
-    if CHROME_PATH:
+    if CHROME_PATH and which(CHROME_PATH) is not None:
     	cmd.append(CHROME_PATH)
-    elif platform.system() == "Windows":
-        cmd.append("C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe")
-    else:
-        cmd.append("chrome")
+    elif which("chrome") is not None:
+    	cmd.append("chrome")
+    elif platform.system() == "Windows" and which(CHROME_WIN_X64) is not None:
+    	cmd.append(CHROME_WIN_X64)
+    elif platform.system() == "Windows" and which(CHROME_WIN_X86) is not None:
+    	cmd.append(CHROME_WIN_X86)
+
+    if len(cmd) == 0 or which(cmd[0]) is None:
+    	sys.exit("Couldn't find Chrome executable.")
 
     if user_agent is not None:
         cmd.append("--user-agent=\"%s\"" % user_agent)
