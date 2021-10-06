@@ -5,9 +5,9 @@ name = "pypi"
 
 [packages]
 click = "*"
-PyInquirer = "*"
+questionary = "*"
 
 [dev-packages]
 
 [requires]
-python_version = "3.9"
+python_version = "3"
