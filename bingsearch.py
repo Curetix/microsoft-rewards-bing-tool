@@ -3,11 +3,8 @@ import subprocess
 import random
 import time
 import platform
-from shutil import which
-
-import click
 import questionary
-from questionary import Choice
+from tqdm import tqdm
 
 WORDS = ["play", "extravagant", "district", "master", "guns", "accursed", "flower", "blush", "allotment", "burning",
          "photograph", "diminished", "hormonal", "hunger", "immunity", "agility", "enlarge", "warrior", "anxiety",
@@ -61,26 +58,19 @@ WORDS = ["play", "extravagant", "district", "master", "guns", "accursed", "flowe
          "grave", "propellant", "disease", "virtual", "dynasty", "blossom", "trap", "potential", "serpent", "drifting",
          "hyaena", "warp", "two", "downfall", "dry", "president"]
 
-EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Safari/537.36 Edg/83.0.478.54"
-MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; POCO F1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.106 Mobile Safari/537.36"
-
-CHROME_WIN_X86 = "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe"
-CHROME_WIN_X64 = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
-# If chrome cannot be found on your system, please enter the path to chrome.exe in this variable
-CHROME_PATH = ""
-
-chrome_process = None
+EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.63 Safari/537.36 Edg/102.0.1245.30"
+MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 12) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.78 Mobile Safari/537.36"
+BROWSER_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
 
 
 def search_all():
     search_normal()
     search_mobile()
-    search_edge()
 
 
 def search_normal():
     print("Starting normal searches")
-    search(32)
+    search(38, EDGE_USER_AGENT)
 
 
 def search_mobile():
@@ -88,65 +78,42 @@ def search_mobile():
     search(22, MOBILE_USER_AGENT)
 
 
-def search_edge():
-    print("Starting Edge searches")
-    search(6, EDGE_USER_AGENT)
-
-
 def search(num_of_searches, user_agent=None):
-    global chrome_process
     search_terms = random.sample(WORDS, num_of_searches)
-    cmd = get_chrome_cmd(user_agent)
-
-    chrome_process = subprocess.Popen(cmd + ["--new-window"])
-
+    cmd = get_browser_cmd(user_agent)
+    process = subprocess.Popen(cmd + ["--new-window"])
     time.sleep(1)
 
     try:
-        with click.progressbar(search_terms) as bar:
-            for term in bar:
-                subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s" % term])
-                time.sleep(1)
+        for term in tqdm(search_terms):
+            subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s" % term])
+            time.sleep(1)
     except KeyboardInterrupt:
-        kill_process(chrome_process.pid)
+        kill_process(process.pid)
         sys.exit()
 
     time.sleep(1)
-    kill_process(chrome_process.pid)
+    kill_process(process.pid)
 
 
 def healthchecks_ping():
-    global chrome_process
-    cmd = get_chrome_cmd()
-    chrome_process = subprocess.Popen(
-        cmd + ["--new-window", "https://hc-ping.com/061fd64c-7bdc-4ad6-ba1e-8fbecd621c7c"]
+    cmd = get_browser_cmd()
+    process = subprocess.Popen(
+        cmd + ["https://hc-ping.com/061fd64c-7bdc-4ad6-ba1e-8fbecd621c7c"]
     )
     time.sleep(2)
-    kill_process(chrome_process.pid)
+    kill_process(process.pid)
 
 
-def open_rewards():
-    global chrome_process
-    cmd = get_chrome_cmd()
-    chrome_process = subprocess.Popen(
-        cmd + ["--new-window", "https://account.microsoft.com/rewards/"]
+def open_rewards_dashboard():
+    cmd = get_browser_cmd()
+    process = subprocess.Popen(
+        cmd + ["https://rewards.microsoft.com/"]
     )
 
 
-def get_chrome_cmd(user_agent=None):
-    cmd = []
-
-    if CHROME_PATH and which(CHROME_PATH) is not None:
-        cmd.append(CHROME_PATH)
-    elif which("chrome") is not None:
-        cmd.append("chrome")
-    elif platform.system() == "Windows" and which(CHROME_WIN_X64) is not None:
-        cmd.append(CHROME_WIN_X64)
-    elif platform.system() == "Windows" and which(CHROME_WIN_X86) is not None:
-        cmd.append(CHROME_WIN_X86)
-
-    if len(cmd) == 0 or which(cmd[0]) is None:
-        sys.exit("Couldn't find Chrome executable.")
+def get_browser_cmd(user_agent=None):
+    cmd = [BROWSER_PATH]
 
     if user_agent is not None:
         cmd.append("--user-agent=\"%s\"" % user_agent)
@@ -162,7 +129,7 @@ def kill_process(pid):
             subprocess.Popen(["kill", str(pid)], stdout=subprocess.DEVNULL)
         time.sleep(0.5)
     except:
-        click.echo("Couldn't kill Chrome process!")
+        print("Couldn't kill browser process!")
 
 
 def menu():
@@ -172,52 +139,18 @@ def menu():
     ).ask()
 
     if not answer:
-        return False
-
+        return
     if answer == "All":
         search_all()
         healthchecks_ping()
-        open_rewards()
+        open_rewards_dashboard()
     elif answer == "Desktop":
         search_normal()
     elif answer == "Mobile":
         search_mobile()
     elif answer == "Edge":
         search_edge()
-    elif answer == "Ping":
-        healthchecks_ping()
-    elif answer == "Rewards":
-        open_rewards()
-
-    return True
-
-
-@click.command()
-@click.option("--all", "all_", is_flag=True)
-@click.option("--normal", is_flag=True)
-@click.option("--mobile", is_flag=True)
-@click.option("--edge", is_flag=True)
-def cli(all_, normal, mobile, edge):
-    if not all_ and not normal and not mobile and not edge:
-        menu()
-    elif all_:
-        search_all()
-    else:
-        if normal:
-            search_normal()
-        if mobile:
-            search_mobile()
-        if edge:
-            search_edge()
 
 
 if __name__ == "__main__":
-    try:
-        cli()
-    except Exception as exception:
-        import traceback
-
-        traceback.print_tb(exception)
-
-    if chrome_process is not None:
-        kill_process(chrome_process.pid)
+    menu()
