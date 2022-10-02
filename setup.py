@@ -2,14 +2,14 @@ from setuptools import setup
 
 setup(
     name="BingSearch",
-    version="1.1",
+    version="1.2.0",
     py_modules=["bingsearch"],
     install_requires=[
-        "click",
-        "PyInquirer"
+        "questionary",
+        "tqdm"
     ],
     entry_points="""
         [console_scripts]
-        bingsearch=bingsearch:cli
+        bingsearch=bingsearch:menu
     """,
 )
