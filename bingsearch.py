@@ -134,22 +134,30 @@ def kill_process(pid):
 
 def menu():
     answer = questionary.select(
-        "Which search do you want to run?",
-        choices=[{"name": n, "value": n} for n in ["All", "Desktop", "Mobile", "Edge", "Ping", "Rewards"]]
+        "What do you want to do?",
+        choices=[
+            "All Searches",
+            "Desktop Searches",
+            "Mobile Searches",
+            "Send Health Ping",
+            "Open Rewards Dashboard"
+        ]
     ).ask()
 
     if not answer:
         return
-    if answer == "All":
+    if answer == "All Daily Searches":
         search_all()
         healthchecks_ping()
         open_rewards_dashboard()
-    elif answer == "Desktop":
+    elif answer == "Daily Desktop Searches":
         search_normal()
-    elif answer == "Mobile":
+    elif answer == "Daily Mobile Searches":
         search_mobile()
-    elif answer == "Edge":
-        search_edge()
+    elif answer == "Send Health Ping":
+        healthchecks_ping()
+    elif answer == "Open Rewards Dashboard":
+        open_rewards_dashboard()
 
 
 if __name__ == "__main__":
