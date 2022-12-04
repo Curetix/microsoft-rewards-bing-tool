@@ -1,9 +1,10 @@
+import os
 import sys
 import subprocess
-import random
-import time
 import platform
 import argparse
+from time import sleep
+from random import sample
 from words import WORDS
 
 EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/107.0.0.0 Safari/537.36 Edg/107.0.1418.62"
@@ -12,16 +13,16 @@ BROWSER_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.ex
 
 
 def search(num_of_searches, user_agent=None, kill=True):
-    search_terms = random.sample(WORDS, num_of_searches)
+    search_terms = sample(WORDS, num_of_searches)
     cmd = get_browser_cmd(user_agent)
     process = subprocess.Popen(cmd + ["--new-window"])
-    time.sleep(1)
+    sleep(1)
 
     try:
         for (i, term) in enumerate(search_terms):
             print("Search %s/%s" % (i+1, len(search_terms)), end="\r")
             subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s" % term])
-            time.sleep(1)
+            sleep(1)
     except KeyboardInterrupt:
         print("")
         print("Aborted!")
@@ -29,7 +30,7 @@ def search(num_of_searches, user_agent=None, kill=True):
         sys.exit()
 
     if kill:
-        time.sleep(1)
+        sleep(1)
         kill_process(process.pid)
 
 
@@ -42,13 +43,13 @@ def health_ping(url: str, kill=True):
     cmd = get_browser_cmd()
     process = subprocess.Popen(cmd + [url])
     if kill:
-        time.sleep(2)
+        sleep(2)
         kill_process(process.pid)
 
 
 def open_rewards_dashboard():
     cmd = get_browser_cmd()
-    process = subprocess.Popen(
+    subprocess.Popen(
         cmd + ["https://rewards.microsoft.com/"]
     )
 
@@ -68,7 +69,7 @@ def kill_process(pid):
             subprocess.Popen(["taskkill", "/F", "/PID", str(pid)], stdout=subprocess.DEVNULL)
         else:
             subprocess.Popen(["kill", str(pid)], stdout=subprocess.DEVNULL)
-        time.sleep(0.5)
+        sleep(0.5)
     except Exception as error:
         print(error)
         print("Couldn't kill browser process!")
@@ -87,8 +88,6 @@ r - Open Microsoft Rewards Dashboard
 def menu():
     answer = input("Make your choice: ").lower().strip()
 
-    if not answer:
-        return
     if answer == "a":
         search(40, EDGE_USER_AGENT)
         search(25, MOBILE_USER_AGENT)
@@ -111,8 +110,12 @@ def menu():
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ping', help="URL to call after action is completed")
+    parser.add_argument('--browser', help="Path to the browser you want to use, default is Edge")
     args = parser.parse_args()
+
     ping_url = args.ping
+    if args.browser and os.path.isfile(args.browser):
+        BROWSER_PATH = args.browser
 
     menu_help()
     menu()
