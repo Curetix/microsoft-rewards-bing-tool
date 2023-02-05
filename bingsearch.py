@@ -24,10 +24,11 @@ def search(num_of_searches, user_agent=None, kill=True):
             subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s" % term])
             sleep(1)
     except KeyboardInterrupt:
-        print("")
-        print("Aborted!")
+        print("\nAborted!")
         kill_process(process.pid)
         sys.exit()
+
+    print("")
 
     if kill:
         sleep(1)
@@ -103,7 +104,6 @@ def menu():
     elif answer == "r":
         open_rewards_dashboard()
     else:
-        print("Invalid choice!")
         menu()
 
 
