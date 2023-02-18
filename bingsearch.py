@@ -78,7 +78,7 @@ def kill_process(pid):
 
 def menu_help():
     print("""Search Menu
-a - All searches, health ping & open dashboard
+a - All searches, health ping & open dashboard (default)
 d - Desktop searches only
 m - Mobile searches only
 p - Send health ping if provided with --ping
@@ -89,7 +89,7 @@ r - Open Microsoft Rewards Dashboard
 def menu():
     answer = input("Make your choice: ").lower().strip()
 
-    if answer == "a":
+    if answer == "a" or answer == "":
         search(40, EDGE_USER_AGENT)
         search(25, MOBILE_USER_AGENT)
         health_ping(ping_url)
