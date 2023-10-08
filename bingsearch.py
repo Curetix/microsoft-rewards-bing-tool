@@ -4,11 +4,11 @@ import subprocess
 import platform
 import argparse
 from time import sleep
-from random import sample
+from random import sample, randint
 from words import WORDS
 
-EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.46"
-MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Mobile Safari/537.36"
+EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68"
+MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36"
 BROWSER_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
 
 
@@ -82,7 +82,8 @@ a - All searches, health ping & open dashboard (default)
 d - Desktop searches only
 m - Mobile searches only
 p - Send health ping if provided with --ping
-r - Open Microsoft Rewards Dashboard
+r - Open Rewards Dashboard
+pr - Send health ping and open Rewards Dashboard
 """)
 
 
@@ -103,6 +104,9 @@ def menu():
         health_ping(ping_url)
     elif answer == "r":
         open_rewards_dashboard()
+    elif answer == "pr":
+        health_ping(ping_url)
+        open_rewards_dashboard()
     else:
         menu()
 
@@ -111,6 +115,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ping', help="URL to call after action is completed")
     parser.add_argument('--browser', help="Path to the browser you want to use, default is Edge")
+    # For Chrome use:  --browser "C:\Program Files\Google\Chrome\Application\chrome.exe"
     args = parser.parse_args()
 
     ping_url = args.ping
