@@ -88,7 +88,13 @@ pr - Send health ping and open Rewards Dashboard
 
 
 def menu():
-    answer = input("Make your choice: ").lower().strip()
+    answer = ""
+
+    try:
+        input("Make your choice: ").lower().strip()
+    except KeyboardInterrupt:
+        print("Aborted")
+        return
 
     if answer == "a" or answer == "":
         search(40, EDGE_USER_AGENT)
