@@ -98,12 +98,12 @@ def menu():
         return
 
     if answer == "a" or answer == "":
-        search(40, EDGE_USER_AGENT)
+        search(40, EDGE_USER_AGENT if not BROWSER_PATH.endswith("msedge.exe") else None)
         search(25, MOBILE_USER_AGENT)
         health_ping(ping_url)
         open_rewards_dashboard()
     elif answer == "d":
-        search(40, EDGE_USER_AGENT)
+        search(40, EDGE_USER_AGENT if not BROWSER_PATH.endswith("msedge.exe") else None)
         open_rewards_dashboard()
     elif answer == "m":
         search(25, MOBILE_USER_AGENT)
