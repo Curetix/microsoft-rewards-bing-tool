@@ -22,7 +22,7 @@ def search(num_of_searches, user_agent=None, kill=True):
     try:
         for (i, term) in enumerate(search_terms):
             print("Search %s/%s" % (i+1, len(search_terms)), end="\r")
-            subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s" % term])
+            subprocess.Popen(cmd + ["https://www.bing.com/search?q=%s&qs=n&form=QBRE&sp=-1&ghc=1&lq=0&pq=%s&sc=10-9&sk=&ghsh=0&ghacc=0&ghpl=" % (term, term)])
             sleep(1)
     except KeyboardInterrupt:
         print("\nAborted!")
