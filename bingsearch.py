@@ -92,7 +92,7 @@ def menu():
     answer = ""
 
     try:
-        input("Make your choice: ").lower().strip()
+        answer = input("Make your choice: ").lower().strip()
     except KeyboardInterrupt:
         print("Aborted")
         return
