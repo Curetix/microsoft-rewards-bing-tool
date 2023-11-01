@@ -3,14 +3,15 @@ import sys
 import subprocess
 import platform
 import argparse
+import json
 from time import sleep
 from random import sample, randint
-from words import WORDS
 
 EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36 Edg/112.0.1722.68"
 MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 13) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Mobile Safari/537.36"
 BROWSER_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
 
+WORDS = []
 
 def search(num_of_searches, user_agent=None, kill=True):
     search_terms = sample(WORDS, num_of_searches)
@@ -121,8 +122,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ping', help="URL to call after action is completed")
     parser.add_argument('--browser', help="Path to the browser you want to use, default is Edge")
+    parser.add_argument("--words", help="Path to JSON word list, default words_en.json", default=os.path.join(os.path.dirname(os.path.realpath(__file__)), "words_en.json"))
     # For Chrome use:  --browser "C:\Program Files\Google\Chrome\Application\chrome.exe"
     args = parser.parse_args()
+
+    with open(args.words, "r") as file:
+        WORDS = json.load(file)
 
     ping_url = args.ping
     if args.browser and os.path.isfile(args.browser):
