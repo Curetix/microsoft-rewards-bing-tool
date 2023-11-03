@@ -10,6 +10,8 @@ from random import sample, randint
 EDGE_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.76"
 MOBILE_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Mobile Safari/537.36 EdgA/118.0.2088.66"
 BROWSER_PATH = "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
+# Chrome:  "C:\Program Files\Google\Chrome\Application\chrome.exe"
+# Firefox: "C:\Program Files\Mozilla Firefox\firefox.exe"
 
 WORDS = []
 
@@ -69,12 +71,19 @@ def kill_process(pid):
     try:
         if platform.system() == "Windows":
             subprocess.Popen(["taskkill", "/F", "/PID", str(pid)], stdout=subprocess.DEVNULL)
+            # Edge is persistent in staying alive, so kill it by process name instead of ID
+            kill_edge()
         else:
             subprocess.Popen(["kill", str(pid)], stdout=subprocess.DEVNULL)
         sleep(0.5)
     except Exception as error:
         print(error)
         print("Couldn't kill browser process!")
+
+
+def kill_edge():
+    if platform.system() == "Windows" and BROWSER_PATH.endswith("msedge.exe"):
+        subprocess.Popen(["taskkill", "/F", "/IM", "msedge.exe"], stdout=subprocess.DEVNULL)
 
 
 def menu_help():
@@ -89,8 +98,6 @@ pr - Send health ping and open Rewards Dashboard
 
 
 def menu():
-    answer = ""
-
     try:
         answer = input("Make your choice: ").lower().strip()
     except KeyboardInterrupt:
@@ -98,14 +105,17 @@ def menu():
         return
 
     if answer == "a" or answer == "":
+        kill_edge()
         search(40, EDGE_USER_AGENT if not BROWSER_PATH.endswith("msedge.exe") else None)
         search(25, MOBILE_USER_AGENT)
         health_ping(ping_url)
         open_rewards_dashboard()
     elif answer == "d":
+        kill_edge()
         search(40, EDGE_USER_AGENT if not BROWSER_PATH.endswith("msedge.exe") else None)
         open_rewards_dashboard()
     elif answer == "m":
+        kill_edge()
         search(25, MOBILE_USER_AGENT)
     elif answer == "p":
         health_ping(ping_url)
@@ -115,6 +125,7 @@ def menu():
         health_ping(ping_url)
         open_rewards_dashboard()
     else:
+        print("Invalid input!")
         menu()
 
 
@@ -123,10 +134,9 @@ if __name__ == "__main__":
     parser.add_argument('--ping', help="URL to call after action is completed")
     parser.add_argument('--browser', help="Path to the browser you want to use, default is Edge")
     parser.add_argument("--words", help="Path to JSON word list, default words_en.json", default=os.path.join(os.path.dirname(os.path.realpath(__file__)), "words_en.json"))
-    # For Chrome use:  --browser "C:\Program Files\Google\Chrome\Application\chrome.exe"
     args = parser.parse_args()
 
-    with open(args.words, "r") as file:
+    with open(args.words, "r", encoding="utf-8") as file:
         WORDS = json.load(file)
 
     ping_url = args.ping
