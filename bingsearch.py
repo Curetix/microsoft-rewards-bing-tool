@@ -39,6 +39,7 @@ def search(num_of_searches, user_agent=None, kill=True):
 
 
 ping_url = None
+game_path = None
 
 
 def health_ping(url: str, kill=True):
@@ -86,6 +87,11 @@ def kill_edge():
         subprocess.Popen(["taskkill", "/F", "/IM", "msedge.exe"], stdout=subprocess.DEVNULL)
 
 
+def open_game():
+    if game_path:
+        subprocess.Popen([game_path], stdout=subprocess.DEVNULL)
+
+
 def menu_help():
     print("""Search Menu
 a - All searches, health ping & open dashboard (default)
@@ -93,6 +99,7 @@ d - Desktop searches only
 m - Mobile searches only
 p - Send health ping if provided with --ping
 r - Open Rewards Dashboard
+g - Open the Xbox game provided with --game (for Game Pass Rewards)
 pr - Send health ping and open Rewards Dashboard
 """)
 
@@ -110,6 +117,7 @@ def menu():
         search(25, MOBILE_USER_AGENT)
         health_ping(ping_url)
         open_rewards_dashboard()
+        open_game()
     elif answer == "d":
         kill_edge()
         search(40, EDGE_USER_AGENT if not BROWSER_PATH.endswith("msedge.exe") else None)
@@ -124,6 +132,8 @@ def menu():
     elif answer == "pr":
         health_ping(ping_url)
         open_rewards_dashboard()
+    elif answer == "g":
+        open_game()
     else:
         print("Invalid input!")
         menu()
@@ -133,15 +143,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--ping', help="URL to call after action is completed")
     parser.add_argument('--browser', help="Path to the browser you want to use, default is Edge")
+    parser.add_argument("--game", help="Path to a Xbox game, for daily Game Pass Rewards")
     parser.add_argument("--words", help="Path to JSON word list, default words_en.json", default=os.path.join(os.path.dirname(os.path.realpath(__file__)), "words_en.json"))
     args = parser.parse_args()
 
     with open(args.words, "r", encoding="utf-8") as file:
         WORDS = json.load(file)
 
-    ping_url = args.ping
     if args.browser and os.path.isfile(args.browser):
         BROWSER_PATH = args.browser
+    if args.game and os.path.isfile(args.game):
+        game_path = args.game
+    ping_url = args.ping
 
     menu_help()
     menu()
